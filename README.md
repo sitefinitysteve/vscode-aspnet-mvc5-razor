@@ -48,7 +48,9 @@ so the extension classifies the root of each member chain itself: Razor page pro
 
 ## Install
 
-There is no Marketplace release yet. Build and install the VSIX:
+**From a release:** download `vscode-aspnet-mvc5-razor.vsix` from [Releases](https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/releases), then run `code --install-extension vscode-aspnet-mvc5-razor.vsix` (or Extensions view → `...` → Install from VSIX).
+
+**From source:**
 
 ```bash
 git clone https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor.git

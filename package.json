@@ -2,7 +2,7 @@
   "name": "vscode-aspnet-mvc5-razor",
   "displayName": "ASP.NET MVC 5 Razor (.NET Framework)",
   "description": "Visual Studio-style Razor highlighting for ASP.NET MVC 5 / System.Web.Razor (.NET Framework) .cshtml views, without the ASP.NET Core Razor language server.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "publisher": "stevescott",
   "license": "MIT",
   "author": {
@@ -64,10 +64,7 @@
           "text.html.basic": "html",
           "source.css": "css",
           "source.js": "javascript"
-        },
-        "unbalancedBracketScopes": [
-          "text.aspnetmvc5razor"
-        ]
+        }
       }
     ],
     "colors": [

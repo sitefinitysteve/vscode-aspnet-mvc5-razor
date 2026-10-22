@@ -9,6 +9,14 @@
   without the false errors from the ASP.NET Core Razor language server.
 </p>
 
+<p align="center">
+  <a href="https://marketplace.visualstudio.com/items?itemName=SitefinitySteve.vscode-aspnet-mvc5-razor"><b>Install from the VS Code Marketplace</b></a>
+  &nbsp;|&nbsp;
+  <a href="https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/releases/latest">Download the VSIX</a>
+  &nbsp;|&nbsp;
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
+
 ---
 
 ![The same MVC 5 view in Visual Studio 2026 (left) and in VS Code with this extension (right)](images/screenshot-comparison.png)
@@ -50,6 +58,14 @@ so the extension classifies the root of each member chain itself: Razor page pro
 `ServiceStack.Text.JsonSerializer` read as namespaces, and in `Ns.Type.Method(` only `Type` is a type.
 
 ## Install
+
+**From the Marketplace (recommended, auto-updates):** install
+[ASP.NET MVC 5 Razor](https://marketplace.visualstudio.com/items?itemName=SitefinitySteve.vscode-aspnet-mvc5-razor),
+search "ASP.NET MVC 5 Razor" in the Extensions view, or run:
+
+```bash
+code --install-extension SitefinitySteve.vscode-aspnet-mvc5-razor
+```
 
 **From a release:** download `vscode-aspnet-mvc5-razor.vsix` from [Releases](https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/releases), then run `code --install-extension vscode-aspnet-mvc5-razor.vsix` (or Extensions view → `...` → Install from VSIX).
 

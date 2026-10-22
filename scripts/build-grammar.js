@@ -47,6 +47,21 @@ if (!directives.some(p => p.include === '#helper-directive')) {
     directives.unshift({ include: '#helper-directive' });
 }
 
+// VS colours `@model Foo.Bar.Baz` as namespace `Foo.Bar.` + type `Baz`; the Core grammar makes it all type.
+const qualifiedType = [
+    {
+        match: '([_[:alpha:]][_[:alnum:]]*)(\\.)(?=[_[:alpha:]])',
+        captures: {
+            1: { name: 'entity.name.type.namespace.cs' },
+            2: { name: 'punctuation.accessor.cs' }
+        }
+    },
+    { include: 'source.cs#type' }
+];
+for (const key of ['model-directive', 'inherits-directive']) {
+    grammar.repository[key].captures[3] = { patterns: qualifiedType };
+}
+
 const out = path.join(__dirname, '..', 'syntaxes', 'aspnetmvc5razor.tmLanguage.json');
 fs.writeFileSync(out, JSON.stringify(grammar, null, 2) + '\n');
 console.log('Wrote ' + out + ' from ' + source);

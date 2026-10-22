@@ -18,8 +18,10 @@ function createDecorations() {
             backgroundColor: new vscode.ThemeColor('aspnetMvc5Razor.codeBackground'),
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
         }),
+        // VS paints transitions like a highlighter: only the text cell, not the full line height.
+        // backgroundColor would fill the line, so the background goes on the inline span via CSS.
         transition: vscode.window.createTextEditorDecorationType({
-            backgroundColor: new vscode.ThemeColor('aspnetMvc5Razor.transitionBackground'),
+            textDecoration: 'none; background-color: var(--vscode-aspnetMvc5Razor-transitionBackground)',
             color: new vscode.ThemeColor('aspnetMvc5Razor.transitionForeground'),
             rangeBehavior: vscode.DecorationRangeBehavior.ClosedClosed
         }),

@@ -862,6 +862,17 @@
         "3": {
           "patterns": [
             {
+              "match": "([_[:alpha:]][_[:alnum:]]*)(\\.)(?=[_[:alpha:]])",
+              "captures": {
+                "1": {
+                  "name": "entity.name.type.namespace.cs"
+                },
+                "2": {
+                  "name": "punctuation.accessor.cs"
+                }
+              }
+            },
+            {
               "include": "source.cs#type"
             }
           ]
@@ -884,6 +895,17 @@
         },
         "3": {
           "patterns": [
+            {
+              "match": "([_[:alpha:]][_[:alnum:]]*)(\\.)(?=[_[:alpha:]])",
+              "captures": {
+                "1": {
+                  "name": "entity.name.type.namespace.cs"
+                },
+                "2": {
+                  "name": "punctuation.accessor.cs"
+                }
+              }
+            },
             {
               "include": "source.cs#type"
             }

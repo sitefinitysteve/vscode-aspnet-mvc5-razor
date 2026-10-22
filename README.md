@@ -57,16 +57,17 @@ Requires Node.js and the `code` command on your PATH. Reload VS Code afterwards.
 
 ## How `.cshtml` files get this language
 
-With `aspnetMvc5Razor.takeOverCshtml` on (the default), a `.cshtml` that opens as `razor`, `aspnetcorerazor`,
-`html` or `plaintext` is switched to ASP.NET MVC 5 Razor, once per file per session. That wins over a
-workspace's `files.associations`, so a repo can safely commit this for everyone else:
+For the right **file icon in Explorer** (before a file is opened), associate `.cshtml` with this language. A
+workspace association wins over the user one, so put it in the repo:
 
 ```jsonc
-// .vscode/settings.json - fallback for people without this extension: highlighting only, no false errors
-"files.associations": { "*.cshtml": "razor" }
+// .vscode/settings.json
+"files.associations": { "*.cshtml": "aspnetmvc5razor" }
 ```
 
-If you pick a different language from the status bar, the extension leaves it alone for the rest of the session.
+Without an association, `aspnetMvc5Razor.takeOverCshtml` (on by default) still switches a `.cshtml` that opens
+as `razor`, `aspnetcorerazor`, `html` or `plaintext`, once per file per session, so highlighting works either
+way; only the Explorer icon needs the association. A language you pick from the status bar is left alone.
 
 ## Settings
 
@@ -98,7 +99,10 @@ same orange, while Visual Studio separates them. To match Visual Studio inside v
     { "scope": ["text.aspnetmvc5razor keyword.control"], "settings": { "foreground": "#D8A0DF" } },
     { "scope": ["text.aspnetmvc5razor keyword.control.razor.directive"], "settings": { "foreground": "#569CD6" } },
     { "scope": ["text.aspnetmvc5razor variable.other.object.property.cs"], "settings": { "foreground": "#DCDCDC" } },
-    { "scope": ["text.aspnetmvc5razor comment"], "settings": { "foreground": "#57A64A" } }
+    { "scope": ["text.aspnetmvc5razor comment"], "settings": { "foreground": "#57A64A" } },
+    { "scope": ["text.aspnetmvc5razor keyword.other.using.cs"], "settings": { "foreground": "#569CD6" } },
+    { "scope": ["text.aspnetmvc5razor entity.name.type.namespace.cs"], "settings": { "foreground": "#DCDCDC" } },
+    { "scope": ["text.aspnetmvc5razor constant.character.entity"], "settings": { "foreground": "#1A9A98" } }
   ]
 }
 ```

@@ -1,6 +1,11 @@
 'use strict';
 const vscode = require('vscode');
+const fs = require('fs');
+const path = require('path');
 const { scan } = require('./scanner');
+const { classify } = require('./semantics');
+const { buildRules, isOwnRule } = require('./palette');
+const { collectRootsAsync } = require('./roots');
 
 const LANGUAGE_ID = 'aspnetmvc5razor';
 // Languages VS Code (or the C# extension) may have picked for a .cshtml before we take it over.
@@ -10,6 +15,9 @@ let decorations = null;
 const timers = new Map();
 // URIs already switched once this session, so a manual language pick is never fought.
 const switched = new Set();
+// Namespace roots declared in the workspace (.cs, web.config, NuGet ids); filled in the background.
+let workspaceRoots = [];
+const EXCLUDE = '**/{bin,obj,node_modules,packages,.git,dist}/**';
 
 function createDecorations() {
     const config = vscode.workspace.getConfiguration('aspnetMvc5Razor');
@@ -27,6 +35,13 @@ function createDecorations() {
         }),
         text: vscode.window.createTextEditorDecorationType({
             fontWeight: config.get('boldMarkupText') ? 'bold' : undefined
+        }),
+        // Member-chain roots TextMate scopes alike: static classes vs page properties (see semantics.js)
+        type: vscode.window.createTextEditorDecorationType({
+            color: new vscode.ThemeColor('aspnetMvc5Razor.staticType')
+        }),
+        plain: vscode.window.createTextEditorDecorationType({
+            color: new vscode.ThemeColor('aspnetMvc5Razor.plainIdentifier')
         })
     };
 }
@@ -48,6 +63,66 @@ function decorate(editor) {
     editor.setDecorations(decorations.code, toRanges(result.code));
     editor.setDecorations(decorations.transition, toRanges(result.transitions));
     editor.setDecorations(decorations.text, toRanges(result.text));
+    const roots = workspaceRoots.concat(vscode.workspace.getConfiguration('aspnetMvc5Razor').get('namespaceRoots') || []);
+    const roles = classify(doc.getText(), result.code, roots);
+    editor.setDecorations(decorations.type, toRanges(roles.types));
+    editor.setDecorations(decorations.plain, toRanges(roles.plain));
+}
+
+async function discoverRoots() {
+    const [cs, configs] = await Promise.all([
+        vscode.workspace.findFiles('**/*.cs', EXCLUDE, 20000),
+        vscode.workspace.findFiles('**/{web.config,Web.config,packages.config,*.csproj}', EXCLUDE, 2000)
+    ]);
+    const roots = await collectRootsAsync(cs.map(u => u.fsPath), configs.map(u => u.fsPath));
+    workspaceRoots = [...roots];
+    vscode.window.visibleTextEditors.forEach(decorate);
+}
+
+function readGrammar(extensionPath, relative) {
+    try {
+        return JSON.parse(fs.readFileSync(path.join(extensionPath, relative), 'utf8'));
+    } catch (e) {
+        return null;
+    }
+}
+
+// Grammars whose scopes can appear in a view: ours plus the built-in C# and HTML ones it embeds.
+function viewGrammars(context) {
+    const grammars = [readGrammar(context.extensionPath, 'syntaxes/aspnetmvc5razor.tmLanguage.json')];
+    for (const id of ['vscode.csharp', 'vscode.html']) {
+        const ext = vscode.extensions.getExtension(id);
+        const contributed = ext && ext.packageJSON.contributes && ext.packageJSON.contributes.grammars;
+        (contributed || []).forEach(g => grammars.push(readGrammar(ext.extensionPath, g.path)));
+    }
+    return grammars.filter(Boolean);
+}
+
+/** Writes the Visual Studio palette into user tokenColorCustomizations, replacing only our own rules. */
+async function applyVisualStudioColours(context, force) {
+    const config = vscode.workspace.getConfiguration('aspnetMvc5Razor');
+    if (!force && !config.get('visualStudioColors')) {
+        return;
+    }
+    const editor = vscode.workspace.getConfiguration('editor');
+    const current = editor.inspect('tokenColorCustomizations').globalValue || {};
+    const others = (current.textMateRules || []).filter(r => !isOwnRule(r));
+    const ours = buildRules(viewGrammars(context));
+    const next = Object.assign({}, current, { textMateRules: others.concat(ours) });
+    if (JSON.stringify(next) === JSON.stringify(current)) {
+        return;
+    }
+    await editor.update('tokenColorCustomizations', next, vscode.ConfigurationTarget.Global);
+    if (force) {
+        vscode.window.showInformationMessage('ASP.NET MVC 5 Razor: Visual Studio colours applied to .cshtml views.');
+    }
+}
+
+async function removeVisualStudioColours() {
+    const editor = vscode.workspace.getConfiguration('editor');
+    const current = editor.inspect('tokenColorCustomizations').globalValue || {};
+    const rules = (current.textMateRules || []).filter(r => !isOwnRule(r));
+    await editor.update('tokenColorCustomizations', Object.assign({}, current, { textMateRules: rules }), vscode.ConfigurationTarget.Global);
 }
 
 function decorateDocument(document, delay) {
@@ -87,7 +162,13 @@ function activate(context) {
                 decorateDocument(e.document, 120);
             }
         }),
+        vscode.commands.registerCommand('aspnetMvc5Razor.applyVisualStudioColors', () => applyVisualStudioColours(context, true)),
+        vscode.commands.registerCommand('aspnetMvc5Razor.removeVisualStudioColors', removeVisualStudioColours),
         vscode.workspace.onDidChangeConfiguration(e => {
+            if (e.affectsConfiguration('aspnetMvc5Razor.visualStudioColors')) {
+                const on = vscode.workspace.getConfiguration('aspnetMvc5Razor').get('visualStudioColors');
+                (on ? applyVisualStudioColours(context, false) : removeVisualStudioColours()).catch(() => undefined);
+            }
             if (e.affectsConfiguration('aspnetMvc5Razor')) {
                 disposeDecorations();
                 decorations = createDecorations();
@@ -97,6 +178,9 @@ function activate(context) {
     );
     vscode.workspace.textDocuments.forEach(maybeTakeOver);
     vscode.window.visibleTextEditors.forEach(decorate);
+    applyVisualStudioColours(context, false).catch(() => undefined);
+    discoverRoots().catch(() => undefined);
+    context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(() => discoverRoots().catch(() => undefined)));
 }
 
 function deactivate() {

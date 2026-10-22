@@ -39,8 +39,12 @@ understands `Views/web.config` and `System.Web.Mvc.WebViewPage`, and only Visual
 editor has one. Microsoft has never brought it to VS Code. Your `.cs` files are unaffected and keep full
 C# tooling.
 
-Type colouring is also approximate. Visual Studio knows `Util` is a class and `Model` is a property because
-it compiles the view; a grammar can only guess from position.
+Identifier colouring is a heuristic, not binding. TextMate scopes `Model`, `Util` and `feed` identically,
+so the extension classifies the root of each member chain itself: Razor page properties (`Model`, `Html`,
+`Url`, `ViewBag`...) plain, camelCase locals light blue, and any other PascalCase root (`Util`, `Math`,
+`String`, `FormMethod`) as a static type. Namespace roots are learned from the workspace (`namespace` in
+`.cs` files, `<add namespace>` in `web.config`, NuGet package ids), so `Medportal.Foo.Bar` and
+`ServiceStack.Text.JsonSerializer` read as namespaces, and in `Ns.Type.Method(` only `Type` is a type.
 
 ## Install
 
@@ -75,6 +79,8 @@ way; only the Explorer icon needs the association. A language you pick from the 
 |---|---|---|
 | `aspnetMvc5Razor.takeOverCshtml` | `true` | Switch `.cshtml` files to this language when they open. |
 | `aspnetMvc5Razor.boldMarkupText` | `true` | Show HTML text in bold, as Visual Studio does. |
+| `aspnetMvc5Razor.visualStudioColors` | `true` | Keep the Visual Studio palette in your user token colours (views only). Off removes it. |
+| `aspnetMvc5Razor.namespaceRoots` | `[]` | Extra namespace roots the workspace scan cannot find. |
 
 ## Colours
 
@@ -86,36 +92,19 @@ sampled from Visual Studio 2026.
 | `aspnetMvc5Razor.codeBackground` | `#464646` | `#F4F4F4` |
 | `aspnetMvc5Razor.transitionBackground` | `#D0D294` | `#FFFF96` |
 | `aspnetMvc5Razor.transitionForeground` | `#000000` | `#000000` |
+| `aspnetMvc5Razor.staticType` | `#4EC9B0` | `#2B91AF` |
+| `aspnetMvc5Razor.plainIdentifier` | `#DCDCDC` | `#000000` |
 
-Token colours come from your theme, which can differ a lot from Visual Studio (some themes colour method
-calls purple, attribute values orange). To pin Visual Studio 2026 Dark inside views only, add this to your user
-settings. Every rule is scoped to `text.aspnetmvc5razor`, so nothing else in VS Code changes:
+Token colours (keywords, strings, types...) are written for you. On start the extension generates Visual
+Studio 2026 Dark rules from the installed Razor, C# and HTML grammars, one per concrete scope and every one
+scoped to `text.aspnetmvc5razor`, and keeps them in your user `editor.tokenColorCustomizations`. Nothing
+outside `.cshtml` views changes, and other rules you have there are left alone.
 
-```jsonc
-"editor.tokenColorCustomizations": {
-  "textMateRules": [
-    { "scope": ["text.aspnetmvc5razor", "text.aspnetmvc5razor variable", "text.aspnetmvc5razor variable.other.object.property.cs", "text.aspnetmvc5razor entity.name.type.namespace.cs"], "settings": { "foreground": "#DCDCDC" } },
-    { "scope": ["text.aspnetmvc5razor entity.name.variable", "text.aspnetmvc5razor variable.parameter"], "settings": { "foreground": "#9CDCFE" } },
-    { "scope": ["text.aspnetmvc5razor keyword", "text.aspnetmvc5razor storage", "text.aspnetmvc5razor constant.language", "text.aspnetmvc5razor keyword.operator.expression"], "settings": { "foreground": "#569CD6" } },
-    { "scope": ["text.aspnetmvc5razor keyword.operator"], "settings": { "foreground": "#B4B4B4" } },
-    { "scope": ["text.aspnetmvc5razor keyword.control"], "settings": { "foreground": "#D8A0DF" } },
-    { "scope": ["text.aspnetmvc5razor keyword.control.razor.directive", "text.aspnetmvc5razor keyword.other.using.cs"], "settings": { "foreground": "#569CD6" } },
-    { "scope": ["text.aspnetmvc5razor keyword.control.razor.directive.model", "text.aspnetmvc5razor keyword.control.razor.directive.functions", "text.aspnetmvc5razor keyword.control.razor.directive.helper", "text.aspnetmvc5razor keyword.control.razor.directive.inherits", "text.aspnetmvc5razor keyword.control.razor.directive.section"], "settings": { "foreground": "#DCDCDC" } },
-    { "scope": ["text.aspnetmvc5razor entity.name.function"], "settings": { "foreground": "#DCDCAA" } },
-    { "scope": ["text.aspnetmvc5razor entity.name.function.htmlhelper.razor"], "settings": { "foreground": "#DCDCDC" } },
-    { "scope": ["text.aspnetmvc5razor entity.name.type"], "settings": { "foreground": "#4EC9B0" } },
-    { "scope": ["text.aspnetmvc5razor entity.name.type.namespace.cs"], "settings": { "foreground": "#DCDCDC" } },
-    { "scope": ["text.aspnetmvc5razor constant.numeric"], "settings": { "foreground": "#B5CEA8" } },
-    { "scope": ["text.aspnetmvc5razor string.quoted.double.cs", "text.aspnetmvc5razor string.quoted.single.cs", "text.aspnetmvc5razor punctuation.definition.string.begin.cs", "text.aspnetmvc5razor punctuation.definition.string.end.cs"], "settings": { "foreground": "#D69D85" } },
-    { "scope": ["text.aspnetmvc5razor comment", "text.aspnetmvc5razor comment.block.razor"], "settings": { "foreground": "#57A64A" } },
-    { "scope": ["text.aspnetmvc5razor punctuation.definition.tag"], "settings": { "foreground": "#808080" } },
-    { "scope": ["text.aspnetmvc5razor entity.name.tag"], "settings": { "foreground": "#569CD6" } },
-    { "scope": ["text.aspnetmvc5razor entity.other.attribute-name"], "settings": { "foreground": "#9CDCFE" } },
-    { "scope": ["text.aspnetmvc5razor string.quoted.double.html", "text.aspnetmvc5razor string.quoted.single.html"], "settings": { "foreground": "#C8C8C8" } },
-    { "scope": ["text.aspnetmvc5razor constant.character.entity"], "settings": { "foreground": "#1A9A98" } }
-  ]
-}
-```
+Why one rule per scope: themes rank a rule by how specifically it matches the token's own scope before
+looking at parents, so a short `text.aspnetmvc5razor storage` loses to a theme's `storage.type.var`.
+Matching the full scope name ties on specificity, and the `text.aspnetmvc5razor` parent then wins.
+
+Commands: **ASP.NET MVC 5 Razor: Apply Visual Studio Colours** and **Remove Visual Studio Colours**.
 
 ## How it works
 
@@ -123,6 +112,9 @@ settings. Every rule is scoped to `text.aspnetmvc5razor`, so nothing else in VS 
 .cshtml ──► TextMate grammar (syntaxes/)     ──► token colours (your theme)
         └─► Razor scanner (src/scanner.js)   ──► decorations: code background, transitions, bold text
 ```
+
+`src/semantics.js` classifies member-chain roots (see above), `src/roots.js` learns namespace roots, and
+`src/palette.js` builds the token colour rules.
 
 `src/scanner.js` is a best-effort parser of MVC 5's rules for where C# starts and ends: implicit and explicit
 expressions, code blocks, `if`/`else`/`foreach`/`using`/`try` and friends, `@functions`, `@helper`,

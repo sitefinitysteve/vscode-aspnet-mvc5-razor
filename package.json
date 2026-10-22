@@ -2,7 +2,7 @@
   "name": "vscode-aspnet-mvc5-razor",
   "displayName": "ASP.NET MVC 5 Razor (.NET Framework)",
   "description": "Visual Studio-style Razor highlighting for ASP.NET MVC 5 / System.Web.Razor (.NET Framework) .cshtml views, without the ASP.NET Core Razor language server.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "stevescott",
   "license": "MIT",
   "author": {
@@ -32,6 +32,7 @@
   ],
   "main": "./src/extension.js",
   "activationEvents": [
+    "onLanguage:aspnetmvc5razor",
     "onLanguage:razor",
     "onLanguage:aspnetcorerazor"
   ],
@@ -96,6 +97,24 @@
           "light": "#000000",
           "highContrast": null
         }
+      },
+      {
+        "id": "aspnetMvc5Razor.staticType",
+        "description": "Static classes and types at the start of a member chain (Util, Math, String), as Visual Studio colours them.",
+        "defaults": {
+          "dark": "#4EC9B0",
+          "light": "#2B91AF",
+          "highContrast": null
+        }
+      },
+      {
+        "id": "aspnetMvc5Razor.plainIdentifier",
+        "description": "Razor page properties (Model, Html, Url, ViewBag) and namespace segments.",
+        "defaults": {
+          "dark": "#DCDCDC",
+          "light": "#000000",
+          "highContrast": null
+        }
       }
     ],
     "configuration": {
@@ -110,6 +129,19 @@
           "type": "boolean",
           "default": true,
           "description": "Show HTML text content in bold, as Visual Studio does."
+        },
+        "aspnetMvc5Razor.visualStudioColors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Keep Visual Studio 2026 Dark token colours in your user editor.tokenColorCustomizations, scoped to .cshtml views only. Turning it off removes them."
+        },
+        "aspnetMvc5Razor.namespaceRoots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Extra namespace roots (e.g. \"Medportal\") so fully-qualified names are not mistaken for static classes. Roots from each view's @using/@model lines, System and Microsoft are always known."
         }
       }
     },
@@ -117,7 +149,19 @@
       "emmet.includeLanguages": {
         "aspnetmvc5razor": "html"
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "aspnetMvc5Razor.applyVisualStudioColors",
+        "title": "Apply Visual Studio Colours",
+        "category": "ASP.NET MVC 5 Razor"
+      },
+      {
+        "command": "aspnetMvc5Razor.removeVisualStudioColors",
+        "title": "Remove Visual Studio Colours",
+        "category": "ASP.NET MVC 5 Razor"
+      }
+    ]
   },
   "scripts": {
     "test": "node --test",

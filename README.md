@@ -138,6 +138,9 @@ it just stops colouring. A large view scans in about 2 ms, and decorations refre
 When a view highlights wrongly, reproduce the construct in `test/scanner.test.js` first, then fix the scanner,
 then run `check-views` against a real codebase to make sure nothing else moved.
 
+**Shipping a new version:** see [RELEASING.md](RELEASING.md) for the checklist (version bump, changelog,
+tests, Marketplace upload, tag and GitHub release).
+
 ## Credits
 
 The grammar is generated from the Razor grammar in the C# extension

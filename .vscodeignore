@@ -4,3 +4,4 @@ scripts/**
 .gitattributes
 dist/**
 images/screenshot*.png
+RELEASING.md

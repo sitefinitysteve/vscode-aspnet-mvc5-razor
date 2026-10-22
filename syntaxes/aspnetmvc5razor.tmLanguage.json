@@ -35,8 +35,29 @@
     "L:source.cs - string - comment": {
       "patterns": [
         {
-          "match": "(?<=\\bHtml\\.)[_[:alpha:]][_[:alnum:]]*(?=\\s*[(<])",
-          "name": "entity.name.function.htmlhelper.razor"
+          "include": "#htmlhelper-method"
+        }
+      ]
+    },
+    "L:source.js, L:source.css": {
+      "patterns": [
+        {
+          "include": "#razor-comment"
+        },
+        {
+          "include": "#escaped-transition"
+        },
+        {
+          "include": "#explicit-razor-expression"
+        },
+        {
+          "include": "#razor-codeblock"
+        },
+        {
+          "include": "#transitioned-csharp-control-structures"
+        },
+        {
+          "include": "#implicit-expression-embedded"
         }
       ]
     }
@@ -2085,6 +2106,48 @@
         }
       ],
       "end": "(?<=})"
+    },
+    "htmlhelper-method": {
+      "match": "(?<=\\bHtml\\.)[_[:alpha:]][_[:alnum:]]*(?=\\s*[(<])",
+      "name": "entity.name.function.htmlhelper.razor"
+    },
+    "htmlhelper-call": {
+      "match": "\\b(Html)(\\.)([_[:alpha:]][_[:alnum:]]*)(?=\\s*[(<])",
+      "captures": {
+        "1": {
+          "name": "variable.other.object.cs"
+        },
+        "2": {
+          "name": "punctuation.accessor.cs"
+        },
+        "3": {
+          "name": "entity.name.function.htmlhelper.razor"
+        }
+      }
+    },
+    "implicit-expression-embedded": {
+      "match": "(?<![[:alnum:]_.])(@)([_[:alpha:]][_[:alnum:]]*(?:\\.[_[:alpha:]][_[:alnum:]]*|\\((?:[^()]|\\([^()]*\\))*\\)|\\[[^\\[\\]]*\\])*)",
+      "name": "meta.expression.implicit.cshtml",
+      "captures": {
+        "1": {
+          "patterns": [
+            {
+              "include": "#transition"
+            }
+          ]
+        },
+        "2": {
+          "name": "source.cs",
+          "patterns": [
+            {
+              "include": "#htmlhelper-call"
+            },
+            {
+              "include": "source.cs#expression"
+            }
+          ]
+        }
+      }
     }
   }
 }

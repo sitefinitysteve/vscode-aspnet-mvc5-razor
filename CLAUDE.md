@@ -70,8 +70,15 @@ Colour comes from three independent layers. Most bugs are a question of which la
   and the grammar contribution must not set `unbalancedBracketScopes` to the root scope (it disables bracket
   colouring for everything outside embedded C#).
 - To see what scope VS Code assigns a token, tokenize with `vscode-textmate` + `vscode-oniguruma` loading
-  `syntaxes/aspnetmvc5razor.tmLanguage.json` and the built-in `csharp`/`html` grammars from the VS Code install;
-  don't guess scopes from the grammar JSON.
+  `syntaxes/aspnetmvc5razor.tmLanguage.json` and the built-in `csharp`/`html`/`javascript`/`css` grammars from
+  the VS Code install; don't guess scopes from the grammar JSON. After any grammar change, tokenize every view
+  of a real codebase too: a bad injection recurses forever and would hang VS Code, and `check-views` (which
+  only runs the JS scanner) cannot catch that.
+- Razor is injected into `<script>`/`<style>` (`L:source.js, L:source.css`) with a single-match
+  `implicit-expression-embedded` rule. Do not inject the Core `#implicit-expression` there: its begin/end region
+  recurses infinitely inside embedded JS.
+- Grammar scope names can contain capture placeholders (`keyword.type.$1.cs`). `palette.js` expands them from
+  the regex alternatives; a placeholder that is skipped means that token silently takes the theme's colour.
 - A security hook in this environment rejects any written file containing the RegExp exec method call (it
   mistakes it for `child_process`). Use `String.match` / `matchAll` instead, as the existing code does.
 

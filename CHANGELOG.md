@@ -2,6 +2,19 @@
 
 All notable changes to this extension. Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-10-22
+
+### Added
+- **Razor inside `<script>` and `<style>`.** `@Model.X`, `@Html.Raw(...)`, `'@Url.Action(...)'` inside a JS
+  string, `@if (...) { <text>...</text> }` and `@* comments *@` are now recognised in inline JavaScript and
+  CSS. Before, they were coloured as JavaScript (a `@*` comment read as a decorator and a multiplication).
+- Visual Studio colours for inline CSS (gold selectors, light-blue property names) and JavaScript.
+
+### Fixed
+- C# type keywords (`string`, `long`, `int`, `bool`, `object`...) and modifiers (`public`, `static`...) could
+  take the colour theme's colour, for example red casts like `(string)item.Title`. Their grammar scope names
+  use capture placeholders (`keyword.type.$1.cs`), which the palette now expands into concrete rules.
+
 ## [0.3.1] - 2026-10-22
 
 ### Fixed
@@ -56,6 +69,7 @@ All notable changes to this extension. Versions follow [Semantic Versioning](htt
 - Takes over `.cshtml` files opened as `razor` / `aspnetcorerazor` / `html` / `plaintext`.
 - Visual Studio-style file icon, Emmet support.
 
+[0.4.0]: https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/releases/tag/v0.4.0
 [0.3.1]: https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/releases/tag/v0.3.1
 [0.3.0]: https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/compare/571f266...00ea7b8
 [0.2.0]: https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/compare/26f3df7...571f266

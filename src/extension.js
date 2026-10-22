@@ -87,10 +87,10 @@ function readGrammar(extensionPath, relative) {
     }
 }
 
-// Grammars whose scopes can appear in a view: ours plus the built-in C# and HTML ones it embeds.
+// Grammars whose scopes can appear in a view: ours plus the built-in ones it embeds (C#, HTML, <script>, <style>).
 function viewGrammars(context) {
     const grammars = [readGrammar(context.extensionPath, 'syntaxes/aspnetmvc5razor.tmLanguage.json')];
-    for (const id of ['vscode.csharp', 'vscode.html']) {
+    for (const id of ['vscode.csharp', 'vscode.html', 'vscode.javascript', 'vscode.css']) {
         const ext = vscode.extensions.getExtension(id);
         const contributed = ext && ext.packageJSON.contributes && ext.packageJSON.contributes.grammars;
         (contributed || []).forEach(g => grammars.push(readGrammar(ext.extensionPath, g.path)));

@@ -23,6 +23,8 @@ const OPERATOR = '#B4B4B4';
 const TAG_PUNCTUATION = '#808080';
 const ATTRIBUTE_VALUE = '#C8C8C8';
 const ENTITY = '#1A9A98';
+const CSS_SELECTOR = '#D7BA7D';
+const CSS_VALUE = '#C8C8C8';
 
 // First match wins, so specific categories come before general ones.
 const CATEGORIES = [
@@ -32,6 +34,11 @@ const CATEGORIES = [
     [/^(string|punctuation\.definition\.string|punctuation\.definition\.(interpolated-)?(char|string))\b/, STRING],
     [/^constant\.character\.escape\b/, '#FFD68F'],
     [/^constant\.character\.entity\b|^punctuation\.definition\.entity\b/, ENTITY],
+    // Embedded <style>: VS colours selectors gold, property names light blue, values plain
+    [/^(entity\.name\.tag|entity\.other\.attribute-name|entity\.other\.keyframe-offset)\b.*\.css$|^meta\.selector\.css$/, CSS_SELECTOR],
+    [/^(support\.type\.(vendored\.)?property-name|meta\.property-name)\b.*\.css$/, LOCAL],
+    [/^(support\.constant|constant\.numeric|keyword\.other\.unit|support\.function|constant\.other\.color|meta\.property-value)\b.*\.css$/, CSS_VALUE],
+    [/^keyword\.control\.at-rule\b.*\.css$/, KEYWORD],
     [/^constant\.numeric\b/, NUMBER],
     [/^keyword\.control\.razor\.directive\.(model|functions|helper|inherits|section|layout)\b/, TEXT],
     [/^keyword\.control\.razor\.directive\b/, KEYWORD],
@@ -66,9 +73,102 @@ function colourFor(scope) {
     return null;
 }
 
-/** Collects every literal scope name a TextMate grammar can assign. */
+/** Source text of capture group k (0 = whole pattern) in a TextMate regex, or null. */
+function groupSource(regex, k) {
+    if (k === 0) {
+        return regex;
+    }
+    let count = 0;
+    for (let i = 0; i < regex.length; i++) {
+        const c = regex[i];
+        if (c === '\\') {
+            i++;
+            continue;
+        }
+        if (c === '[') {
+            while (i < regex.length && regex[i] !== ']') {
+                i += regex[i] === '\\' ? 2 : 1;
+            }
+            continue;
+        }
+        if (c !== '(') {
+            continue;
+        }
+        // Capturing: a plain or named group, not (?: (?= (?! (?<= (?<!
+        const named = /^\(\?<[A-Za-z_]/.test(regex.slice(i, i + 4));
+        if (regex[i + 1] === '?' && !named) {
+            continue;
+        }
+        count++;
+        if (count !== k) {
+            continue;
+        }
+        let depth = 0;
+        for (let j = i; j < regex.length; j++) {
+            if (regex[j] === '\\') {
+                j++;
+            } else if (regex[j] === '(') {
+                depth++;
+            } else if (regex[j] === ')' && --depth === 0) {
+                const inner = regex.slice(i + 1, j);
+                return named ? inner.replace(/^\?<[A-Za-z_]\w*>/, '') : inner;
+            }
+        }
+        return null;
+    }
+    return null;
+}
+
+/** Words a simple alternation like `bool|s?byte|n?u?int` can match, or null if it is not that simple. */
+function expandAlternation(source) {
+    const body = source.replace(/^\\b|\\b$/g, '');
+    if (!/^[A-Za-z|?-]+$/.test(body)) {
+        return null;
+    }
+    const words = [];
+    for (const alt of body.split('|')) {
+        let variants = [''];
+        for (let i = 0; i < alt.length; i++) {
+            const optional = alt[i + 1] === '?';
+            const ch = alt[i];
+            variants = optional ? variants.flatMap(v => [v, v + ch]) : variants.map(v => v + ch);
+            if (optional) {
+                i++;
+            }
+        }
+        words.push(...variants.filter(Boolean));
+    }
+    return words;
+}
+
+/**
+ * Scope names with capture placeholders (`keyword.type.$1.cs`) are expanded from the regex's alternatives
+ * (`keyword.type.string.cs`, `keyword.type.long.cs`...). When the regex is too complex to expand, the
+ * prefix before the placeholder is used instead, so the token still gets a (less specific) rule.
+ */
+function expandName(name, regex) {
+    const m = name.match(/\$(\d+)/);
+    if (!m) {
+        return [name];
+    }
+    const source = typeof regex === 'string' ? groupSource(regex, Number(m[1])) : null;
+    const words = source ? expandAlternation(source) : null;
+    if (words) {
+        return words.map(w => name.replace(m[0], w.toLowerCase()));
+    }
+    const prefix = name.slice(0, name.indexOf(m[0])).replace(/\.$/, '');
+    return prefix ? [prefix] : [];
+}
+
+/** Collects every scope name a TextMate grammar can assign, with placeholders expanded. */
 function scopesOf(grammar) {
     const found = new Set();
+    const addAll = (value, regex) => {
+        if (typeof value !== 'string') {
+            return;
+        }
+        value.split(/\s+/).filter(Boolean).forEach(n => expandName(n, regex).forEach(s => found.add(s)));
+    };
     const visit = node => {
         if (Array.isArray(node)) {
             node.forEach(visit);
@@ -77,9 +177,12 @@ function scopesOf(grammar) {
         if (!node || typeof node !== 'object') {
             return;
         }
-        for (const key of ['name', 'contentName']) {
-            if (typeof node[key] === 'string') {
-                node[key].split(/\s+/).filter(s => s && !s.includes('$')).forEach(s => found.add(s));
+        addAll(node.name, node.match || node.begin);
+        addAll(node.contentName, node.begin);
+        const captureSets = [['captures', node.match || node.begin], ['beginCaptures', node.begin], ['endCaptures', node.end], ['whileCaptures', node.while]];
+        for (const [key, regex] of captureSets) {
+            for (const capture of Object.values(node[key] || {})) {
+                addAll(capture && capture.name, regex);
             }
         }
         Object.values(node).forEach(visit);
@@ -119,4 +222,4 @@ function isOwnRule(rule) {
     return scopes.length > 0 && scopes.every(s => typeof s === 'string' && (s === ROOT || s.startsWith(ROOT + ' ')));
 }
 
-module.exports = { buildRules, isOwnRule, colourFor, ROOT };
+module.exports = { buildRules, isOwnRule, colourFor, scopesOf, expandName, ROOT };

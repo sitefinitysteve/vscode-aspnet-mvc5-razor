@@ -64,12 +64,43 @@ for (const key of ['model-directive', 'inherits-directive']) {
 
 // VS shows HtmlHelper calls (`Html.Partial(`, `Html.Raw(`) in plain text colour, unlike other method calls.
 // Left-priority injection so it wins over the C# grammar's invocation rule.
+grammar.repository['htmlhelper-method'] = {
+    match: '(?<=\\bHtml\\.)[_[:alpha:]][_[:alnum:]]*(?=\\s*[(<])',
+    name: 'entity.name.function.htmlhelper.razor'
+};
+// Same, anchored at `Html` so it wins inside a capture, where the C# expression rule would start there first.
+grammar.repository['htmlhelper-call'] = {
+    match: '\\b(Html)(\\.)([_[:alpha:]][_[:alnum:]]*)(?=\\s*[(<])',
+    captures: {
+        1: { name: 'variable.other.object.cs' },
+        2: { name: 'punctuation.accessor.cs' },
+        3: { name: 'entity.name.function.htmlhelper.razor' }
+    }
+};
 grammar.injections['L:source.cs - string - comment'] = {
+    patterns: [{ include: '#htmlhelper-method' }]
+};
+
+// Razor still runs inside <script> and <style> (`var url = '@Url.Action(...)'`, `@* note *@`), but the Core
+// grammar only injects into HTML attribute strings and C#, so those regions were coloured as plain JS/CSS.
+// The Core #implicit-expression is a begin/end region that recurses forever inside embedded JS, so script and
+// style get a single-match version: `@ident` + `.ident` / `(...)` / `[...]` (one nesting level), C# inside.
+grammar.repository['implicit-expression-embedded'] = {
+    match: '(?<![[:alnum:]_.])(@)([_[:alpha:]][_[:alnum:]]*(?:\\.[_[:alpha:]][_[:alnum:]]*|\\((?:[^()]|\\([^()]*\\))*\\)|\\[[^\\[\\]]*\\])*)',
+    name: 'meta.expression.implicit.cshtml',
+    captures: {
+        1: { patterns: [{ include: '#transition' }] },
+        2: { name: 'source.cs', patterns: [{ include: '#htmlhelper-call' }, { include: 'source.cs#expression' }] }
+    }
+};
+grammar.injections['L:source.js, L:source.css'] = {
     patterns: [
-        {
-            match: '(?<=\\bHtml\\.)[_[:alpha:]][_[:alnum:]]*(?=\\s*[(<])',
-            name: 'entity.name.function.htmlhelper.razor'
-        }
+        { include: '#razor-comment' },
+        { include: '#escaped-transition' },
+        { include: '#explicit-razor-expression' },
+        { include: '#razor-codeblock' },
+        { include: '#transitioned-csharp-control-structures' },
+        { include: '#implicit-expression-embedded' }
     ]
 };
 

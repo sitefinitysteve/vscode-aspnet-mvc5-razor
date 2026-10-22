@@ -5,3 +5,5 @@ scripts/**
 dist/**
 images/screenshot*.png
 RELEASING.md
+plans/**
+CLAUDE.md

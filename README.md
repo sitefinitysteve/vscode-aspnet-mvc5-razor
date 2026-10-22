@@ -11,6 +11,8 @@
 
 ---
 
+![The same MVC 5 view in Visual Studio 2026 (left) and in VS Code with this extension (right)](images/screenshot-comparison.png)
+
 ## The problem
 
 The C# extension's Razor support only understands **ASP.NET Core** Razor. Open a view from an MVC 5 /

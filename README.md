@@ -38,7 +38,8 @@ It adds a dedicated **ASP.NET MVC 5 Razor** language (`aspnetmvc5razor`) for `.c
 
 No hover, go-to-definition, IntelliSense or real diagnostics inside views. Those need a compiler that
 understands `Views/web.config` and `System.Web.Mvc.WebViewPage`, and only Visual Studio's legacy Razor
-editor has one. Microsoft has never brought it to VS Code. Your `.cs` files are unaffected and keep full
+editor has one. Microsoft has never brought it to VS Code. A design for an open-source replacement (Razor 3 + Roslyn language
+server, Windows only) is in [plans/language-server-design.md](plans/language-server-design.md); nothing is built yet. Your `.cs` files are unaffected and keep full
 C# tooling.
 
 Identifier colouring is a heuristic, not binding. TextMate scopes `Model`, `Util` and `feed` identically,

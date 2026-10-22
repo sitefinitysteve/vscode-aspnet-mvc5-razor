@@ -10,8 +10,10 @@
 </p>
 
 <p align="center">
-  <a href="https://marketplace.visualstudio.com/items?itemName=SitefinitySteve.vscode-aspnet-mvc5-razor"><b>Install from the VS Code Marketplace</b></a>
-  &nbsp;|&nbsp;
+  <a href="https://marketplace.visualstudio.com/items?itemName=SitefinitySteve.vscode-aspnet-mvc5-razor"><img src="images/install-button.png" width="320" alt="Install from the VS Code Marketplace"></a>
+</p>
+
+<p align="center">
   <a href="https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/releases/latest">Download the VSIX</a>
   &nbsp;|&nbsp;
   <a href="CHANGELOG.md">Changelog</a>

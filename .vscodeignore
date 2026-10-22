@@ -1,0 +1,6 @@
+test/**
+scripts/**
+.gitignore
+.gitattributes
+dist/**
+images/screenshot*.png

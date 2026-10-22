@@ -1,0 +1,129 @@
+{
+  "name": "vscode-aspnet-mvc5-razor",
+  "displayName": "ASP.NET MVC 5 Razor (.NET Framework)",
+  "description": "Visual Studio-style Razor highlighting for ASP.NET MVC 5 / System.Web.Razor (.NET Framework) .cshtml views, without the ASP.NET Core Razor language server.",
+  "version": "0.1.0",
+  "publisher": "stevescott",
+  "license": "MIT",
+  "author": {
+    "name": "Steve Scott"
+  },
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor/issues"
+  },
+  "homepage": "https://github.com/sitefinitysteve/vscode-aspnet-mvc5-razor#readme",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "razor",
+    "cshtml",
+    "aspnet",
+    "mvc5",
+    ".net framework"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onLanguage:razor",
+    "onLanguage:aspnetcorerazor"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "aspnetmvc5razor",
+        "aliases": [
+          "ASP.NET MVC 5 Razor",
+          "cshtml (MVC 5)"
+        ],
+        "extensions": [
+          ".cshtml"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./images/cshtml-light.svg",
+          "dark": "./images/cshtml-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "aspnetmvc5razor",
+        "scopeName": "text.aspnetmvc5razor",
+        "path": "./syntaxes/aspnetmvc5razor.tmLanguage.json",
+        "embeddedLanguages": {
+          "source.cs": "csharp",
+          "text.html.basic": "html",
+          "source.css": "css",
+          "source.js": "javascript"
+        },
+        "unbalancedBracketScopes": [
+          "text.aspnetmvc5razor"
+        ]
+      }
+    ],
+    "colors": [
+      {
+        "id": "aspnetMvc5Razor.codeBackground",
+        "description": "Background of C# code inside a Razor view (Visual Studio's \"Razor Code\").",
+        "defaults": {
+          "dark": "#464646",
+          "light": "#F4F4F4",
+          "highContrast": null
+        }
+      },
+      {
+        "id": "aspnetMvc5Razor.transitionBackground",
+        "description": "Background of Razor transitions: @, @( ), @{ }, @* *@.",
+        "defaults": {
+          "dark": "#D0D294",
+          "light": "#FFFF96",
+          "highContrast": null
+        }
+      },
+      {
+        "id": "aspnetMvc5Razor.transitionForeground",
+        "description": "Foreground of Razor transitions.",
+        "defaults": {
+          "dark": "#000000",
+          "light": "#000000",
+          "highContrast": null
+        }
+      }
+    ],
+    "configuration": {
+      "title": "ASP.NET MVC 5 Razor",
+      "properties": {
+        "aspnetMvc5Razor.takeOverCshtml": {
+          "type": "boolean",
+          "default": true,
+          "description": "Switch .cshtml files opened as 'razor' or 'aspnetcorerazor' to ASP.NET MVC 5 Razor. Wins over files.associations, so the C# extension's ASP.NET Core Razor server never sees them."
+        },
+        "aspnetMvc5Razor.boldMarkupText": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show HTML text content in bold, as Visual Studio does."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "emmet.includeLanguages": {
+        "aspnetmvc5razor": "html"
+      }
+    }
+  },
+  "scripts": {
+    "test": "node --test",
+    "check-views": "node scripts/check-views.js",
+    "build-grammar": "node scripts/build-grammar.js",
+    "package": "npx --yes @vscode/vsce@3.6.0 package -o dist/vscode-aspnet-mvc5-razor.vsix",
+    "install-local": "npm run package && code --install-extension dist/vscode-aspnet-mvc5-razor.vsix --force"
+  }
+}

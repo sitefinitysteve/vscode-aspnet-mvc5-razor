@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Packaged extension
+dist/
+*.vsix
+
+# VS Code extension test host
+.vscode-test/
+
+# Logs and OS noise
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db

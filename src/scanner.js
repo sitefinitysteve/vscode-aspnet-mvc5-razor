@@ -14,6 +14,8 @@
 const VOID_ELEMENTS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
 const RAW_TEXT_ELEMENTS = new Set(['script', 'style']);
 const CONTROL_KEYWORDS = new Set(['if', 'for', 'foreach', 'while', 'switch', 'lock', 'using', 'try', 'do']);
+// Razor 3 emits these keywords (and the whitespace after them) as MetaCode, which VS paints like a transition.
+const META_KEYWORDS = new Set(['model', 'inherits', 'helper', 'section', 'functions', 'layout', 'sessionstate']);
 const LINE_DIRECTIVES = new Set(['model', 'using', 'inherits', 'layout', 'sessionstate', 'implements', 'namespace', 'page', 'inject']);
 // Previous non-whitespace characters after which `<` inside C# starts a markup element.
 const MARKUP_AFTER = new Set(['{', '}', ';', ':', '>']);
@@ -339,17 +341,25 @@ function scan(text) {
         const start = i + 1;
         const word = readWord(start);
         const afterWord = skipWs(start + word.length);
+        let body = start;
+        if (META_KEYWORDS.has(word)) {
+            body = start + word.length;
+            while (text[body] === ' ' || text[body] === '	') {
+                body++;
+            }
+            mark(transitions, start, body);
+        }
 
         if (CONTROL_KEYWORDS.has(word) && !(word === 'using' && text[afterWord] !== '(')) {
             return controlStructure(start, word);
         }
         if (word === 'functions') {
             if (text[afterWord] !== '{') {
-                mark(code, start, start + word.length);
+                mark(code, body, start + word.length);
                 return start + word.length;
             }
             const e = skipBalanced(afterWord);
-            mark(code, start, e);
+            mark(code, body, e);
             return e;
         }
         if (word === 'helper') {
@@ -358,13 +368,13 @@ function scan(text) {
             if (text[k] === '(') {
                 k = skipBalanced(k);
             }
-            mark(code, start, k);
+            mark(code, body, k);
             k = skipWs(k);
             return text[k] === '{' ? braceBlock(k, false) : k;
         }
         if (word === 'section') {
             let k = afterWord + readWord(afterWord).length;
-            mark(code, start, k);
+            mark(code, body, k);
             k = skipWs(k);
             if (text[k] !== '{') {
                 return k;
@@ -380,7 +390,7 @@ function scan(text) {
         if (LINE_DIRECTIVES.has(word)) {
             const eol = text.indexOf('\n', start);
             const end = eol < 0 ? n : eol;
-            mark(code, start, end);
+            mark(code, body, end);
             return end;
         }
         const e = implicitExpression(start);

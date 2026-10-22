@@ -62,6 +62,17 @@ for (const key of ['model-directive', 'inherits-directive']) {
     grammar.repository[key].captures[3] = { patterns: qualifiedType };
 }
 
+// VS shows HtmlHelper calls (`Html.Partial(`, `Html.Raw(`) in plain text colour, unlike other method calls.
+// Left-priority injection so it wins over the C# grammar's invocation rule.
+grammar.injections['L:source.cs - string - comment'] = {
+    patterns: [
+        {
+            match: '(?<=\\bHtml\\.)[_[:alpha:]][_[:alnum:]]*(?=\\s*[(<])',
+            name: 'entity.name.function.htmlhelper.razor'
+        }
+    ]
+};
+
 const out = path.join(__dirname, '..', 'syntaxes', 'aspnetmvc5razor.tmLanguage.json');
 fs.writeFileSync(out, JSON.stringify(grammar, null, 2) + '\n');
 console.log('Wrote ' + out + ' from ' + source);

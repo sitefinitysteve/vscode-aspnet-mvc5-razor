@@ -87,21 +87,31 @@ sampled from Visual Studio 2026.
 | `aspnetMvc5Razor.transitionBackground` | `#D0D294` | `#FFFF96` |
 | `aspnetMvc5Razor.transitionForeground` | `#000000` | `#000000` |
 
-Token colours come from your theme. VS Code's default theme colours HTML attribute values and C# strings the
-same orange, while Visual Studio separates them. To match Visual Studio inside views only, scope rules to
-`text.aspnetmvc5razor`:
+Token colours come from your theme, which can differ a lot from Visual Studio (some themes colour method
+calls purple, attribute values orange). To pin Visual Studio 2026 Dark inside views only, add this to your user
+settings. Every rule is scoped to `text.aspnetmvc5razor`, so nothing else in VS Code changes:
 
 ```jsonc
 "editor.tokenColorCustomizations": {
   "textMateRules": [
-    { "scope": ["text.aspnetmvc5razor string.quoted.double.html", "text.aspnetmvc5razor string.quoted.single.html"], "settings": { "foreground": "#C8C8C8" } },
-    { "scope": ["text.aspnetmvc5razor string.quoted.double.cs", "text.aspnetmvc5razor string.quoted.single.cs"], "settings": { "foreground": "#D69D85" } },
+    { "scope": ["text.aspnetmvc5razor", "text.aspnetmvc5razor variable", "text.aspnetmvc5razor variable.other.object.property.cs", "text.aspnetmvc5razor entity.name.type.namespace.cs"], "settings": { "foreground": "#DCDCDC" } },
+    { "scope": ["text.aspnetmvc5razor entity.name.variable", "text.aspnetmvc5razor variable.parameter"], "settings": { "foreground": "#9CDCFE" } },
+    { "scope": ["text.aspnetmvc5razor keyword", "text.aspnetmvc5razor storage", "text.aspnetmvc5razor constant.language", "text.aspnetmvc5razor keyword.operator.expression"], "settings": { "foreground": "#569CD6" } },
+    { "scope": ["text.aspnetmvc5razor keyword.operator"], "settings": { "foreground": "#B4B4B4" } },
     { "scope": ["text.aspnetmvc5razor keyword.control"], "settings": { "foreground": "#D8A0DF" } },
-    { "scope": ["text.aspnetmvc5razor keyword.control.razor.directive"], "settings": { "foreground": "#569CD6" } },
-    { "scope": ["text.aspnetmvc5razor variable.other.object.property.cs"], "settings": { "foreground": "#DCDCDC" } },
-    { "scope": ["text.aspnetmvc5razor comment"], "settings": { "foreground": "#57A64A" } },
-    { "scope": ["text.aspnetmvc5razor keyword.other.using.cs"], "settings": { "foreground": "#569CD6" } },
+    { "scope": ["text.aspnetmvc5razor keyword.control.razor.directive", "text.aspnetmvc5razor keyword.other.using.cs"], "settings": { "foreground": "#569CD6" } },
+    { "scope": ["text.aspnetmvc5razor keyword.control.razor.directive.model", "text.aspnetmvc5razor keyword.control.razor.directive.functions", "text.aspnetmvc5razor keyword.control.razor.directive.helper", "text.aspnetmvc5razor keyword.control.razor.directive.inherits", "text.aspnetmvc5razor keyword.control.razor.directive.section"], "settings": { "foreground": "#DCDCDC" } },
+    { "scope": ["text.aspnetmvc5razor entity.name.function"], "settings": { "foreground": "#DCDCAA" } },
+    { "scope": ["text.aspnetmvc5razor entity.name.function.htmlhelper.razor"], "settings": { "foreground": "#DCDCDC" } },
+    { "scope": ["text.aspnetmvc5razor entity.name.type"], "settings": { "foreground": "#4EC9B0" } },
     { "scope": ["text.aspnetmvc5razor entity.name.type.namespace.cs"], "settings": { "foreground": "#DCDCDC" } },
+    { "scope": ["text.aspnetmvc5razor constant.numeric"], "settings": { "foreground": "#B5CEA8" } },
+    { "scope": ["text.aspnetmvc5razor string.quoted.double.cs", "text.aspnetmvc5razor string.quoted.single.cs", "text.aspnetmvc5razor punctuation.definition.string.begin.cs", "text.aspnetmvc5razor punctuation.definition.string.end.cs"], "settings": { "foreground": "#D69D85" } },
+    { "scope": ["text.aspnetmvc5razor comment", "text.aspnetmvc5razor comment.block.razor"], "settings": { "foreground": "#57A64A" } },
+    { "scope": ["text.aspnetmvc5razor punctuation.definition.tag"], "settings": { "foreground": "#808080" } },
+    { "scope": ["text.aspnetmvc5razor entity.name.tag"], "settings": { "foreground": "#569CD6" } },
+    { "scope": ["text.aspnetmvc5razor entity.other.attribute-name"], "settings": { "foreground": "#9CDCFE" } },
+    { "scope": ["text.aspnetmvc5razor string.quoted.double.html", "text.aspnetmvc5razor string.quoted.single.html"], "settings": { "foreground": "#C8C8C8" } },
     { "scope": ["text.aspnetmvc5razor constant.character.entity"], "settings": { "foreground": "#1A9A98" } }
   ]
 }

@@ -31,6 +31,14 @@
           "include": "#inline-template"
         }
       ]
+    },
+    "L:source.cs - string - comment": {
+      "patterns": [
+        {
+          "match": "(?<=\\bHtml\\.)[_[:alpha:]][_[:alnum:]]*(?=\\s*[(<])",
+          "name": "entity.name.function.htmlhelper.razor"
+        }
+      ]
     }
   },
   "patterns": [

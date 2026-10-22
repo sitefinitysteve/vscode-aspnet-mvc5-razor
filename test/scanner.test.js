@@ -68,14 +68,14 @@ test('razor comments mark both delimiters only', () => {
 test('functions block is all code, including braces in strings', () => {
     const src = '@functions {\n  object Row(Item p)\n  {\n    return new { url = String.Format("/x/{0}", p.Id) };\n  }\n}\n<p>t</p>';
     const r = spans(src);
-    assert.deepStrictEqual(r.code, ['functions {', 'object Row(Item p)', '{', 'return new { url = String.Format("/x/{0}", p.Id) };', '}', '}']);
+    assert.deepStrictEqual(r.code, ['{', 'object Row(Item p)', '{', 'return new { url = String.Format("/x/{0}", p.Id) };', '}', '}']);
     assert.deepStrictEqual(r.text, ['t']);
 });
 
 test('helper with markup body and nested statements', () => {
     const src = '@helper Render(List<Item> items)\n{\n  <table>@if (items == null) { <tr><td>None</td></tr> }</table>\n}\n<p>t</p>';
     const r = spans(src);
-    assert.deepStrictEqual(r.code, ['helper Render(List<Item> items)', '{', 'if (items == null) {', '}', '}']);
+    assert.deepStrictEqual(r.code, ['Render(List<Item> items)', '{', 'if (items == null) {', '}', '}']);
     assert.deepStrictEqual(r.text, ['None', 't']);
 });
 
@@ -89,7 +89,8 @@ test('code block @{ } braces are transitions', () => {
 test('line directives, escaped @@ and e-mail addresses', () => {
     const src = '@model Foo.Bar\n@using System.Linq;\n<p>steve@medportal.ca @@home</p>';
     const r = spans(src);
-    assert.deepStrictEqual(r.code, ['model Foo.Bar', 'using System.Linq;']);
+    assert.deepStrictEqual(r.code, ['Foo.Bar', 'using System.Linq;']);
+    assert.deepStrictEqual(r.transitions, ['@', 'model ', '@']);
     assert.deepStrictEqual(r.text, ['steve@medportal.ca @@home']);
 });
 
@@ -120,6 +121,6 @@ test('markup after in-code @expr, // comment and @* *@ inside a block', () => {
 
 test('section body is markup', () => {
     const r = spans('@section Scripts {\n  <p>hi</p>\n}\n<b>x</b>');
-    assert.deepStrictEqual(r.code, ['section Scripts {', '}']);
+    assert.deepStrictEqual(r.code, ['Scripts {', '}']);
     assert.deepStrictEqual(r.text, ['hi', 'x']);
 });
